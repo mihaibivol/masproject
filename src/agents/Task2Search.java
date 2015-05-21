@@ -1,83 +1,25 @@
 package agents;
 
-import java.awt.Point;
-import java.util.ArrayList;
-import java.util.Random;
-
 import jade.core.AID;
-import jade.core.Agent;
 import jade.core.behaviours.TickerBehaviour;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.UnreadableException;
 
-public class Task1Agent extends Agent {
+import java.awt.Point;
+
+public class Task2Search extends Task1Agent {
+
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	protected ArrayList<Point> possibleDest = new ArrayList<Point>();
-	
-	protected Random rng = new Random();
-	
-	/** Helpers for getting the direction to a point 
-	 * Use them in child classes*/
-	
-	/** Depending on the destination you can do one or two moves to get there */
-	protected ArrayList<String> getPossibleDirs(Point dest) {
-		ArrayList<String> res = new ArrayList<String>();
-		if (dest.getX() > 0) res.add("Right");
-		if (dest.getX() < 0) res.add("Left");
-		if (dest.getY() > 0) res.add("Down");
-		if (dest.getY() < 0) res.add("Up");
-		return res;
-	}
-	
-	protected ArrayList<String> getComplement(ArrayList<String> dirs) {
-		ArrayList<String> res = new ArrayList<String>();
-		res.add("Left");
-		res.add("Right");
-		res.add("Up");
-		res.add("Down");
-		if (dirs == null) return res;
-		res.removeAll(dirs);
-		return res;
-	}
-	
-	protected <T> T randomChoice(ArrayList<T> s) {
-		int idx = rng.nextInt(s.size());
-		return s.get(idx);
-	}
-	
-	protected Point getClosest(ArrayList<Point> points) {
-		Point origin = new Point(0, 0);
-		Point res = null;
-		double minDist = Double.MAX_VALUE;
-		for (Point p : points) {
-			double dist = p.distance(origin);
-			if (dist < minDist) {
-				minDist = dist;
-				res = p;
-			}
-		}
-		return res;
-	}
-	
-	protected Point destFromDir(String dir) {
-		if (dir.equals("Right")) return new Point(1, 0);
-		if (dir.equals("Left")) return new Point(-1, 0);
-		if (dir.equals("Up")) return new Point(0, -1);
-		if (dir.equals("Down")) return new Point(0, 1);
-		return new Point(0, 0);
-	}
-	
-	/** End of helpers */
-	
+
 	@Override
 	protected void setup() {
 		System.out.println("Agent started");
 		// Subscribe to the world
 		ACLMessage m = new ACLMessage(ACLMessage.SUBSCRIBE);
-		m.setContent("Task1");
+		m.setContent("Task2Search");
 		m.addReceiver(new AID("world", AID.ISLOCALNAME));
 		send(m);
 		
@@ -131,17 +73,14 @@ public class Task1Agent extends Agent {
 					return;
 				}
 				
+				/* Just move randomly without being drawn to anything else */
 				shuffleDest();
 				String dir = randomChoice(getPossibleDirs(defaultDest));
-				if (state.full) {
-					dir = randomChoice(getPossibleDirs(state.shipVector));
-				} else if (!state.goldVector.isEmpty()) {
-					Point dest = getClosest(state.goldVector);
-					dir = randomChoice(getPossibleDirs(dest));
-				} else if (state.done && !state.empty) {
-					dir = randomChoice(getPossibleDirs(state.shipVector));
-				}
 					
+				/* TODO send messages with the gold position */
+				/*
+				 * Gold position can be translated given the ship vector and the gold vector
+				 */
 				if (state.obstacleVector.contains(destFromDir(dir)))
 					dir = randomChoice(getComplement(null));
 				if (state.agentsVector.contains(destFromDir(dir)))
@@ -156,3 +95,4 @@ public class Task1Agent extends Agent {
 		});
 	}
 }
+
