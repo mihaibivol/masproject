@@ -22,6 +22,7 @@ public class Task1Agent extends Agent {
 		System.out.println("Agent started");
 		// Subscribe to the world
 		ACLMessage m = new ACLMessage(ACLMessage.SUBSCRIBE);
+		m.setContent("Task1");
 		m.addReceiver(new AID("world", AID.ISLOCALNAME));
 		send(m);
 		

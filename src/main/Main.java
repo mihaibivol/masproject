@@ -5,7 +5,7 @@ import jade.Boot;
 public class Main {
 	public static void main(String [] args) {
 		String agentCmdLine = "world:agents.World()";
-		int noAgents = 200;
+		int noAgents = 20;
 		for (int i = 0; i < noAgents; i++) {
 			agentCmdLine += ";agent" + i + ":agents.Task1Agent()";
 		}

@@ -70,6 +70,7 @@ public class World extends Agent {
 		public Point pos;
 		public int capacity;
 		public int having;
+		public String type;
 
 		public Agent(AID aid) {
 			super(aid);
@@ -178,8 +179,16 @@ public class World extends Agent {
 				ACLMessage m = receive(mt);
 				if (m != null) {
 					Agent a = new Agent(m.getSender());
-					a.capacity = 3;
+					String type = m.getContent();
 					a.having = 0;
+					if (type.equals("Task1")) {
+						a.capacity = 3;
+					} else if (type.equals("Task2Carrier")) {
+						a.capacity = GOLD * 2;
+					} else if (type.equals("Task2Search")) {
+						a.capacity = 0;
+					}
+					a.type = type;
 					if (agents.contains(a)) return;
 					
 					agents.add(a);
@@ -363,7 +372,14 @@ public class World extends Agent {
 						g.setColor(Color.orange);
 						g.fillRect(x * S, y * S, S, S);
 					} else if (actors.get(0) instanceof Agent) {
-						g.setColor(Color.green);
+						Agent a = (Agent)actors.get(0);
+						if (a.type.equals("Task1")) {
+							g.setColor(Color.green);
+						} else if (a.type.equals("Task2Carrier")) {
+							g.setColor(Color.cyan);
+						} else if (a.type.equals("Task2Search")) {
+							g.setColor(Color.pink);
+						}
 						g.fillRect(x * S, y * S, S, S);
 					}
 				}
