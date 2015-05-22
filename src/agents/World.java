@@ -441,6 +441,7 @@ public class World extends Agent {
 	};
 
 	public static void broadcast(String channel, jade.core.Agent agent, ACLMessage message) {
+		//System.out.println("broadcasting");
 		try {
 			DFAgentDescription template = new DFAgentDescription();
 			ServiceDescription sd = new ServiceDescription();

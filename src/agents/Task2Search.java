@@ -10,6 +10,7 @@ import java.awt.Point;
 import java.awt.geom.AffineTransform;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 
 import agents.World.Ship;
 
@@ -59,17 +60,18 @@ public class Task2Search extends Task1Agent {
 					return;
 				}
 				
-				
-				ACLMessage msg = World.ConversationType.GOLD_DISCOVERY.createNewMessage();
-				
-				
-				try {
-					msg.setContentObject(translatePointsToShip(state.shipVector, state.goldVector));
-				} catch (IOException e) {
-					e.printStackTrace();
+				if (!state.goldVector.isEmpty()) {	
+					ACLMessage msg = World.ConversationType.GOLD_DISCOVERY.createNewMessage();
+					
+					
+					try {
+						msg.setContentObject(translatePointsToShip(state.shipVector, new HashSet<Point>(state.goldVector)));
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+					
+					World.broadcast("CarrierAgents", myAgent, msg);
 				}
-				
-				World.broadcast("CarrierAgents", myAgent, msg);
 				
 				String dir;
 
@@ -100,8 +102,8 @@ public class Task2Search extends Task1Agent {
 
 	}
 	
-	ArrayList<Point> translatePointsToShip(Point shipVector, ArrayList<Point> goldVector) {
-		ArrayList<Point> points = new ArrayList<Point>();
+	HashSet<Point> translatePointsToShip(Point shipVector, HashSet<Point> goldVector) {
+		HashSet<Point> points = new HashSet<Point>();
 		for (Point p : goldVector) {
 			points.add(new Point(p.x - shipVector.x, p.y - shipVector.y));
 		}

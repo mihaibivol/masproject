@@ -72,15 +72,14 @@ public class Task2Carrier extends Task1Agent {
 				ACLMessage msg = blockingReceive(World.ConversationType.GOLD_DISCOVERY.getTemplate(), 20);
 				if (msg != null) {
 					try {
-						ArrayList<Point> newPoints = (ArrayList<Point>) msg.getContentObject();
-						for (Point p : newPoints) {
-							if (!unclaimedGoldLocations.contains(p)) {
-								goldInfoWasUpdated = true;
-								unclaimedGoldLocations.add(p);
-							}
+						HashSet<Point> newPoints = (HashSet<Point>) msg.getContentObject();
+						newPoints.removeAll(claimedGoldLocations);
+						int size = unclaimedGoldLocations.size();
+						unclaimedGoldLocations.addAll(newPoints);
+						if (size != unclaimedGoldLocations.size()) {
+							goldInfoWasUpdated = true;
 						}
-						
-						updateIntentions();
+
 					} catch (UnreadableException e) {
 						e.printStackTrace();
 					}
@@ -90,6 +89,7 @@ public class Task2Carrier extends Task1Agent {
 		});
 		
 		addBehaviour(new MoveBehaviour(this));
+		addBehaviour(new HandleClaimsBehaviour());
 		
 		/** TODO add a behavior to speak with other agents so they can get
 		 * the gold coordinates and decide together a gathering plan
@@ -162,8 +162,8 @@ public class Task2Carrier extends Task1Agent {
 					Point average = getAverage();
 					if (claimRequest.distance < average.distance(claimRequest.point)) {
 						claimedGoldLocations.remove(claimRequest.point);
-					} else {
-						// claim again!
+						unclaimedGoldLocations.remove(claimRequest.point);
+					} else if (claimedGoldLocations.contains(claimRequest.point)) {
 						ACLMessage claimMessage = claim.createReply();
 						try {
 							claimMessage.setContentObject(new ClaimRequest(claimRequest.point,
@@ -229,6 +229,8 @@ public class Task2Carrier extends Task1Agent {
 				return;
 			}
 			
+			
+			updateIntentions();
 			
 			// get closest point
 			Point bestPoint = null;
