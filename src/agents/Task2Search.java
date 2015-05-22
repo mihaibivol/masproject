@@ -7,6 +7,7 @@ import jade.lang.acl.MessageTemplate;
 import jade.lang.acl.UnreadableException;
 
 import java.awt.Point;
+import java.awt.geom.AffineTransform;
 import java.io.IOException;
 import java.util.ArrayList;
 
@@ -19,7 +20,6 @@ public class Task2Search extends Task1Agent {
 	 */
 	private static final long serialVersionUID = 1L;
 
-	private ArrayList<Point> possibleDest;
 	@Override
 	protected void setup() {
 		System.out.println("Agent started");
@@ -35,35 +35,12 @@ public class Task2Search extends Task1Agent {
 			e.printStackTrace();
 		}
 		
-		
-		/* This can remain for search agents
-		 * they are drawn to points in the lower right corner frontier
-		 * if they don't have anything else to do
-		 */
-		int frontier = 3000;
-		for (int i = -frontier; i < frontier; i+= 10) {
-			possibleDest.add(new Point(i, frontier));
-			possibleDest.add(new Point(frontier, i));
-		}
-		
 		addBehaviour(new TickerBehaviour(this, 50) {
 			
 			/**
 			 * 
 			 */
 			private static final long serialVersionUID = 1L;
-			
-			private Point defaultDest = randomChoice(possibleDest);
-			
-
-			
-			/* This is sort of a agent's builtin random number generator */
-			private void shuffleDest() {
-				if (rng.nextDouble() < .05) {
-					defaultDest = randomChoice(possibleDest);
-				}
-			}
-			
 
 			@Override
 			protected void onTick() {
@@ -82,14 +59,6 @@ public class Task2Search extends Task1Agent {
 					return;
 				}
 				
-				/* Just move randomly without being drawn to anything else */
-				shuffleDest();
-				String dir = randomChoice(getPossibleDirs(defaultDest));
-					
-				/* TODO send messages with the gold position */
-				/*
-				 * Gold position can be translated given the ship vector and the gold vector
-				 */
 				
 				ACLMessage msg = World.ConversationType.GOLD_DISCOVERY.createNewMessage();
 				
@@ -102,10 +71,24 @@ public class Task2Search extends Task1Agent {
 				
 				World.broadcast("CarrierAgents", myAgent, msg);
 				
+				String dir;
+
+				if (state.shipVector.distance(new Point(0, 0)) > 5) {
+					Point dest = (Point)state.shipVector.clone();
+					dest.move(-dest.x, -dest.y);
+					AffineTransform aft = new AffineTransform();
+					aft.rotate(1.0);
+					aft.transform(dest, dest);
+					dir = randomChoice(getPossibleDirs(dest));
+				} else {
+					dir = randomChoice(getComplement(null));
+				}
+					
 				if (state.obstacleVector.contains(destFromDir(dir)))
 					dir = randomChoice(getComplement(null));
 				if (state.agentsVector.contains(destFromDir(dir)))
 					dir = randomChoice(getComplement(null));
+				
 				
 				//System.out.println(state);
 				ACLMessage m = new ACLMessage(ACLMessage.CFP);
