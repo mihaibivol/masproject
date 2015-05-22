@@ -3,10 +3,14 @@ package agents;
 import jade.core.AID;
 import jade.core.behaviours.TickerBehaviour;
 import jade.lang.acl.ACLMessage;
+import jade.lang.acl.MessageTemplate;
 import jade.lang.acl.UnreadableException;
 
 import java.awt.Point;
+import java.io.IOException;
 import java.util.ArrayList;
+
+import agents.World.Ship;
 
 public class Task2Search extends Task1Agent {
 
@@ -63,10 +67,13 @@ public class Task2Search extends Task1Agent {
 
 			@Override
 			protected void onTick() {
-				ACLMessage sm = new ACLMessage(ACLMessage.REQUEST);
+				MessageTemplate template = World.ConversationType.AGENT_STATE.getTemplate();
+				ACLMessage sm = World.ConversationType.AGENT_STATE.createNewMessage();
 				sm.addReceiver(new AID("world", AID.ISLOCALNAME));
+				sm.setReplyWith("state" + System.currentTimeMillis());
+				
 				send(sm);
-				ACLMessage reply = blockingReceive();
+				ACLMessage reply = blockingReceive(template);
 				AgentState state = null;
 				
 				try {
@@ -83,6 +90,18 @@ public class Task2Search extends Task1Agent {
 				/*
 				 * Gold position can be translated given the ship vector and the gold vector
 				 */
+				
+				ACLMessage msg = World.ConversationType.GOLD_DISCOVERY.createNewMessage();
+				
+				
+				try {
+					msg.setContentObject(translatePointsToShip(state.shipVector, state.goldVector));
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+				
+				World.broadcast("CarrierAgents", myAgent, msg);
+				
 				if (state.obstacleVector.contains(destFromDir(dir)))
 					dir = randomChoice(getComplement(null));
 				if (state.agentsVector.contains(destFromDir(dir)))
@@ -95,6 +114,16 @@ public class Task2Search extends Task1Agent {
 				send(m);
 			}
 		});
+
+	}
+	
+	ArrayList<Point> translatePointsToShip(Point shipVector, ArrayList<Point> goldVector) {
+		ArrayList<Point> points = new ArrayList<Point>();
+		for (Point p : goldVector) {
+			points.add(new Point(p.x - shipVector.x, p.y - shipVector.y));
+		}
+		
+		return points;
 	}
 }
 

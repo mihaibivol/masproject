@@ -15,6 +15,9 @@ import javax.swing.JPanel;
 import jade.core.AID;
 import jade.core.Agent;
 import jade.core.behaviours.Behaviour;
+import jade.domain.DFService;
+import jade.domain.FIPAAgentManagement.DFAgentDescription;
+import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 
@@ -301,8 +304,9 @@ public class World extends Agent {
 			
 			@Override
 			public void action() {
-				MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.REQUEST);
+				MessageTemplate mt = World.ConversationType.AGENT_STATE.getTemplate();
 				ACLMessage m = receive(mt);
+
 				if (m != null) {
 					ACLMessage reply = m.createReply();
 					// Get a reference to the actual agent in the agent list
@@ -410,5 +414,50 @@ public class World extends Agent {
 			p.repaint();
 		}
 	}
+	
+	public enum ConversationType {
+		GOLD_DISCOVERY("gold-discovery", ACLMessage.INFORM),
+		CLAIM_GOLD("claim-gold", ACLMessage.INFORM),
+		AGENT_STATE("agent-state", ACLMessage.INFORM);
+		
+		public String conversationId;
+		public int performative;
+		
+		public ACLMessage createNewMessage() {
+			ACLMessage msg = new ACLMessage(performative);
+			msg.setConversationId(conversationId);
+			
+			return msg;
+		}
+		
+		public MessageTemplate getTemplate() {
+			return MessageTemplate.and(MessageTemplate.MatchPerformative(performative), MessageTemplate.MatchConversationId(conversationId));
+		}
+		
+		private ConversationType(String conversation, int perf) {
+			this.conversationId = conversation;
+			this.performative = perf;
+		}
+	};
 
+	public static void broadcast(String channel, jade.core.Agent agent, ACLMessage message) {
+		try {
+			DFAgentDescription template = new DFAgentDescription();
+			ServiceDescription sd = new ServiceDescription();
+			sd.setType(channel);
+			template.addServices(sd);
+			
+			DFAgentDescription[] result = DFService.search(agent, template);
+			for (DFAgentDescription description : result) {
+				if (description.getName().equals(agent.getAID())) {
+					continue;
+				}
+				message.addReceiver(description.getName());
+			}
+			
+			agent.send(message);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
 }

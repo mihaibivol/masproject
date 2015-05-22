@@ -9,6 +9,7 @@ import jade.core.AID;
 import jade.core.Agent;
 import jade.core.behaviours.TickerBehaviour;
 import jade.lang.acl.ACLMessage;
+import jade.lang.acl.MessageTemplate;
 import jade.lang.acl.UnreadableException;
 
 public class Task1Agent extends Agent {
@@ -125,10 +126,14 @@ public class Task1Agent extends Agent {
 
 			@Override
 			protected void onTick() {
-				ACLMessage sm = new ACLMessage(ACLMessage.REQUEST);
+				MessageTemplate template = World.ConversationType.AGENT_STATE.getTemplate();
+				ACLMessage sm = World.ConversationType.AGENT_STATE.createNewMessage();
 				sm.addReceiver(new AID("world", AID.ISLOCALNAME));
+				sm.setReplyWith("state" + System.currentTimeMillis());
+				
 				send(sm);
-				ACLMessage reply = blockingReceive();
+				ACLMessage reply = blockingReceive(template);
+
 				AgentState state = null;
 				
 				try {
