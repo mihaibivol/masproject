@@ -1,6 +1,7 @@
 package agents;
 
 import java.awt.Point;
+import java.awt.geom.AffineTransform;
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -15,9 +16,9 @@ public class Task1Agent extends Agent {
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	protected ArrayList<Point> possibleDest = new ArrayList<Point>();
 	
 	protected Random rng = new Random();
+	
 	
 	/** Helpers for getting the direction to a point 
 	 * Use them in child classes*/
@@ -29,6 +30,7 @@ public class Task1Agent extends Agent {
 		if (dest.getX() < 0) res.add("Left");
 		if (dest.getY() > 0) res.add("Down");
 		if (dest.getY() < 0) res.add("Up");
+		if (res.isEmpty()) res.add("Right");
 		return res;
 	}
 	
@@ -62,12 +64,37 @@ public class Task1Agent extends Agent {
 		return res;
 	}
 	
+	protected Point getMostFar(ArrayList<Point> points) {
+		Point origin = new Point(0, 0);
+		Point res = null;
+		double maxDist = -1;
+		for (Point p : points) {
+			double dist = p.distance(origin);
+			if (dist > maxDist) {
+				maxDist = dist;
+				res = p;
+			}
+		}
+		return res;
+	}
+	
 	protected Point destFromDir(String dir) {
 		if (dir.equals("Right")) return new Point(1, 0);
 		if (dir.equals("Left")) return new Point(-1, 0);
 		if (dir.equals("Up")) return new Point(0, -1);
 		if (dir.equals("Down")) return new Point(0, 1);
 		return new Point(0, 0);
+	}
+	
+	protected Point getAverageVector(ArrayList<Point> agents) {
+		int x = 0;
+		int y = 0;
+		for (Point p : agents) {
+			x += p.x;
+			y += p.y;
+		}
+		
+		return new Point(-x / agents.size(), -y / agents.size());
 	}
 	
 	/** End of helpers */
@@ -85,18 +112,8 @@ public class Task1Agent extends Agent {
 			Thread.sleep(1000);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
-		}
-		
-		
-		/* This can remain for search agents
-		 * they are drawn to points in the lower right corner frontier
-		 * if they don't have anything else to do
-		 */
-		int frontier = 3000;
-		for (int i = -frontier; i < frontier; i+= 10) {
-			possibleDest.add(new Point(i, frontier));
-			possibleDest.add(new Point(frontier, i));
-		}
+		}		
+
 		
 		addBehaviour(new TickerBehaviour(this, 50) {
 			
@@ -104,17 +121,6 @@ public class Task1Agent extends Agent {
 			 * 
 			 */
 			private static final long serialVersionUID = 1L;
-			
-			private Point defaultDest = randomChoice(possibleDest);
-			
-
-			
-			/* This is sort of a agent's builtin random number generator */
-			private void shuffleDest() {
-				if (rng.nextDouble() < .05) {
-					defaultDest = randomChoice(possibleDest);
-				}
-			}
 			
 
 			@Override
@@ -131,8 +137,7 @@ public class Task1Agent extends Agent {
 					return;
 				}
 				
-				shuffleDest();
-				String dir = randomChoice(getPossibleDirs(defaultDest));
+				String dir;
 				if (state.full) {
 					dir = randomChoice(getPossibleDirs(state.shipVector));
 				} else if (!state.goldVector.isEmpty()) {
@@ -140,12 +145,22 @@ public class Task1Agent extends Agent {
 					dir = randomChoice(getPossibleDirs(dest));
 				} else if (state.done && !state.empty) {
 					dir = randomChoice(getPossibleDirs(state.shipVector));
+				} else if (state.shipVector.distance(new Point(0, 0)) > 5) {
+					Point dest = (Point)state.shipVector.clone();
+					dest.move(-dest.x, -dest.y);
+					AffineTransform aft = new AffineTransform();
+					aft.rotate(1.0);
+					aft.transform(dest, dest);
+					dir = randomChoice(getPossibleDirs(dest));
+				} else {
+					dir = randomChoice(getComplement(null));
 				}
 					
 				if (state.obstacleVector.contains(destFromDir(dir)))
 					dir = randomChoice(getComplement(null));
 				if (state.agentsVector.contains(destFromDir(dir)))
 					dir = randomChoice(getComplement(null));
+				
 				
 				//System.out.println(state);
 				ACLMessage m = new ACLMessage(ACLMessage.CFP);

@@ -126,8 +126,8 @@ public class World extends Agent {
 		
 		int numobst = OBST;
 		int numgold = GOLD;
-		int x = rng.nextInt(SX);
-		int y = rng.nextInt(SY);
+		int x = X / 2 + rng.nextInt(SX) - SX / 2;
+		int y = Y / 2 + rng.nextInt(SY) - SY / 2;
 		map.get(new Point(x, y)).add(new Ship());
 		ship = new Point(x, y);
 				
@@ -136,7 +136,9 @@ public class World extends Agent {
 			y = rng.nextInt(Y);
 			
 			Point p = new Point(x, y);
-			if ((x < SX && y < SY) || !map.get(p).isEmpty()) {
+			if ((x < (X / 2 + SX / 2) && x > (X / 2 - SX / 2)
+				  && y < (Y / 2 + SY / 2) && y > (Y / 2 - SY / 2))
+					|| !map.get(p).isEmpty()) {
 				numobst++;
 				continue;
 			}
@@ -150,7 +152,9 @@ public class World extends Agent {
 			y = rng.nextInt(Y);
 			
 			Point p = new Point(x, y);
-			if ((x < SX && y < SY) || !map.get(p).isEmpty()) {
+			if ((x < (X / 2 + SX / 2) && x > (X / 2 - SX / 2)
+				  && y < (Y / 2 + SY / 2) && y > (Y / 2 - SY / 2))
+					|| !map.get(p).isEmpty()) {
 				numgold++;
 				continue;
 			}
@@ -193,11 +197,11 @@ public class World extends Agent {
 					
 					agents.add(a);
 					Random rng = new Random();
-					int x = rng.nextInt(SX);
-					int y = rng.nextInt(SY);
+					int x = X / 2 + rng.nextInt(SX) - SX / 2;
+					int y = Y / 2 + rng.nextInt(SY) - SY / 2;
 					while (!map.get(new Point(x, y)).isEmpty()) {
-						x = rng.nextInt(SX);
-						y = rng.nextInt(SY);
+						x = X / 2 + rng.nextInt(SX) - SX / 2;
+						y = Y / 2 + rng.nextInt(SY) - SY / 2;
 					}
 					Point p = new Point(x, y);
 					a.pos = p;
@@ -261,7 +265,7 @@ public class World extends Agent {
 					
 					if (containsClass(things, "Ship")) {
 						totalGold += a.having;
-						System.out.println("Received more gold: " + totalGold);
+						System.out.println("Received more gold: " + totalGold + " " + totalMoves / agents.size());
 						a.having = 0;
 						if (totalGold == GOLD) {
 							System.out.println("Average total moves: " + totalMoves / agents.size());

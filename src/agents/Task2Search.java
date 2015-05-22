@@ -6,6 +6,7 @@ import jade.lang.acl.ACLMessage;
 import jade.lang.acl.UnreadableException;
 
 import java.awt.Point;
+import java.util.ArrayList;
 
 public class Task2Search extends Task1Agent {
 
@@ -14,6 +15,7 @@ public class Task2Search extends Task1Agent {
 	 */
 	private static final long serialVersionUID = 1L;
 
+	private ArrayList<Point> possibleDest;
 	@Override
 	protected void setup() {
 		System.out.println("Agent started");
