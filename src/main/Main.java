@@ -10,7 +10,7 @@ public class Main {
 			agentCmdLine += ";agentT1" + i + ":agents.Task1Agent()";
 		}
 		/** TODO change this to test task 2 **/
-		int noAgentsT2S = 20;
+		int noAgentsT2S = 30;
 		for (int i = 0; i < noAgentsT2S; i++) {
 			agentCmdLine += ";agentT2S" + i + ":agents.Task2Search()";
 		}

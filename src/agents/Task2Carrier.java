@@ -69,7 +69,8 @@ public class Task2Carrier extends Task1Agent {
 
 			@Override
 			public void action() {
-				ACLMessage msg = blockingReceive(World.ConversationType.GOLD_DISCOVERY.getTemplate(), 20);
+				ACLMessage msg = receive(World.ConversationType.GOLD_DISCOVERY.getTemplate());
+
 				if (msg != null) {
 					try {
 						HashSet<Point> newPoints = (HashSet<Point>) msg.getContentObject();
@@ -83,6 +84,8 @@ public class Task2Carrier extends Task1Agent {
 					} catch (UnreadableException e) {
 						e.printStackTrace();
 					}
+				} else {
+					block();
 				}
 					
 			}
@@ -155,7 +158,8 @@ public class Task2Carrier extends Task1Agent {
 
 		@Override
 		public void action() {
-			ACLMessage claim = blockingReceive(World.ConversationType.CLAIM_GOLD.getTemplate(), 20);
+			ACLMessage claim = receive(World.ConversationType.CLAIM_GOLD.getTemplate());
+
 			if (claim != null) {
 				try {
 					ClaimRequest claimRequest = (ClaimRequest) claim.getContentObject();
@@ -178,6 +182,8 @@ public class Task2Carrier extends Task1Agent {
 				} catch (UnreadableException e) {
 					e.printStackTrace();
 				}
+			} else {
+				block();
 			}
 		}	
 	}

@@ -33,6 +33,8 @@ public class World extends Agent {
 	 */
 	private static final long serialVersionUID = 1L;
 	
+	static ArrayList<AID> carriers = new ArrayList<AID>();
+	
 	
 	private int X;
 	private int Y;
@@ -191,8 +193,10 @@ public class World extends Agent {
 					if (type.equals("Task1")) {
 						a.capacity = 3;
 					} else if (type.equals("Task2Carrier")) {
+						carriers.add(m.getSender());
 						a.capacity = GOLD * 2;
 					} else if (type.equals("Task2Search")) {
+
 						a.capacity = 0;
 					}
 					a.type = type;
@@ -416,44 +420,38 @@ public class World extends Agent {
 	}
 	
 	public enum ConversationType {
-		GOLD_DISCOVERY("gold-discovery", ACLMessage.INFORM),
-		CLAIM_GOLD("claim-gold", ACLMessage.INFORM),
-		AGENT_STATE("agent-state", ACLMessage.INFORM);
+		GOLD_DISCOVERY("gold-discovery", ACLMessage.INFORM_IF),
+		CLAIM_GOLD("claim-gold", ACLMessage.INFORM_REF),
+		AGENT_STATE("agent-state", ACLMessage.REQUEST_WHENEVER);
 		
 		public String conversationId;
 		public int performative;
 		
 		public ACLMessage createNewMessage() {
 			ACLMessage msg = new ACLMessage(performative);
-			msg.setConversationId(conversationId);
 			
 			return msg;
 		}
 		
 		public MessageTemplate getTemplate() {
-			return MessageTemplate.and(MessageTemplate.MatchPerformative(performative), MessageTemplate.MatchConversationId(conversationId));
+			return MessageTemplate.MatchPerformative(performative);
 		}
 		
 		private ConversationType(String conversation, int perf) {
-			this.conversationId = conversation;
+			//this.conversationId = conversation;
 			this.performative = perf;
 		}
 	};
 
 	public static void broadcast(String channel, jade.core.Agent agent, ACLMessage message) {
-		//System.out.println("broadcasting");
+		
+		//System.out.println("broadcasting:" + message.getConversationId() + "" + i++);
 		try {
-			DFAgentDescription template = new DFAgentDescription();
-			ServiceDescription sd = new ServiceDescription();
-			sd.setType(channel);
-			template.addServices(sd);
-			
-			DFAgentDescription[] result = DFService.search(agent, template);
-			for (DFAgentDescription description : result) {
-				if (description.getName().equals(agent.getAID())) {
+			for (AID aid : carriers) {
+				if (aid.equals(agent.getAID())) {
 					continue;
 				}
-				message.addReceiver(description.getName());
+				message.addReceiver(aid);
 			}
 			
 			agent.send(message);
