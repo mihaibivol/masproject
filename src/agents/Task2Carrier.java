@@ -164,7 +164,8 @@ public class Task2Carrier extends Task1Agent {
 				try {
 					ClaimRequest claimRequest = (ClaimRequest) claim.getContentObject();
 					Point average = getAverage();
-					if (claimRequest.distance < 1.3 * average.distance(claimRequest.point)) {
+					if ((claimedGoldLocations.size() >= 1 && claimRequest.distance < 1.3 * average.distance(claimRequest.point)) ||
+							(claimedGoldLocations.size() == 0 && claimRequest.distance < average.distance(claimRequest.point) )) {
 						claimedGoldLocations.remove(claimRequest.point);
 						unclaimedGoldLocations.remove(claimRequest.point);
 					} else if (claimedGoldLocations.contains(claimRequest.point)) {
@@ -235,6 +236,21 @@ public class Task2Carrier extends Task1Agent {
 				return;
 			}
 			
+			/*
+			 * furaciune
+			 */
+			if (!state.goldVector.isEmpty()) {	
+				ACLMessage msg = World.ConversationType.GOLD_DISCOVERY.createNewMessage();
+				
+				
+				try {
+					msg.setContentObject(translatePointsToShip(state.shipVector, new HashSet<Point>(state.goldVector)));
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+				
+				//World.broadcast("SI MIE", myAgent, msg);
+			}
 			
 			updateIntentions();
 			
@@ -285,5 +301,13 @@ public class Task2Carrier extends Task1Agent {
 		
 	}
 
+	HashSet<Point> translatePointsToShip(Point shipVector, HashSet<Point> goldVector) {
+		HashSet<Point> points = new HashSet<Point>();
+		for (Point p : goldVector) {
+			points.add(new Point(p.x - shipVector.x, p.y - shipVector.y));
+		}
+		
+		return points;
+	}
 	
 }

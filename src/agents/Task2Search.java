@@ -74,12 +74,15 @@ public class Task2Search extends Task1Agent {
 				}
 				
 				String dir;
+				if (state.done) {
+					return;
+				}
 
 				if (state.shipVector.distance(new Point(0, 0)) > 5) {
 					Point dest = (Point)state.shipVector.clone();
 					dest.move(-dest.x, -dest.y);
 					AffineTransform aft = new AffineTransform();
-					aft.rotate(1.0);
+					aft.rotate(1.3);
 					aft.transform(dest, dest);
 					dir = randomChoice(getPossibleDirs(dest));
 				} else {

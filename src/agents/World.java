@@ -448,7 +448,7 @@ public class World extends Agent {
 		//System.out.println("broadcasting:" + message.getConversationId() + "" + i++);
 		try {
 			for (AID aid : carriers) {
-				if (aid.equals(agent.getAID())) {
+				if (aid.equals(agent.getAID()) && !channel.equals("SI MIE")) {
 					continue;
 				}
 				message.addReceiver(aid);
