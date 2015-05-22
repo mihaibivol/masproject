@@ -249,7 +249,7 @@ public class Task2Carrier extends Task1Agent {
 					e.printStackTrace();
 				}
 				
-				//World.broadcast("SI MIE", myAgent, msg);
+				World.broadcast("SI MIE", myAgent, msg);
 			}
 			
 			updateIntentions();

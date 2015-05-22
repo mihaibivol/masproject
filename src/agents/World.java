@@ -38,7 +38,7 @@ public class World extends Agent {
 	
 	private int X;
 	private int Y;
-	private final int S = 7;
+	private final int S = 3;
 	private int SX;
 	private int SY;
 	
@@ -112,8 +112,8 @@ public class World extends Agent {
 	
 	@Override
 	protected void setup() {
-		X = 110;
-		Y = 110;
+		X = 210;
+		Y = 210;
 		SX = 30;
 		SY = 30;
 		
