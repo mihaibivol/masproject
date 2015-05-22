@@ -164,7 +164,7 @@ public class Task2Carrier extends Task1Agent {
 				try {
 					ClaimRequest claimRequest = (ClaimRequest) claim.getContentObject();
 					Point average = getAverage();
-					if (claimRequest.distance < average.distance(claimRequest.point)) {
+					if (claimRequest.distance < 1.3 * average.distance(claimRequest.point)) {
 						claimedGoldLocations.remove(claimRequest.point);
 						unclaimedGoldLocations.remove(claimRequest.point);
 					} else if (claimedGoldLocations.contains(claimRequest.point)) {
