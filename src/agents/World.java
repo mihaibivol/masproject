@@ -110,6 +110,14 @@ public class World extends Agent {
 		return false;
 	}
 	
+	boolean inEllipse(int x, int y) {
+		x -= X / 2;
+		y -= Y / 2;
+		double xx = X / 2;
+		double yy = Y / 2;
+		return ((x * x) / (xx * xx) + (y * y) / (yy * yy)) <= 1;
+	}
+	
 	@Override
 	protected void setup() {
 		X = 210;
@@ -143,7 +151,8 @@ public class World extends Agent {
 			Point p = new Point(x, y);
 			if ((x < (X / 2 + SX / 2) && x > (X / 2 - SX / 2)
 				  && y < (Y / 2 + SY / 2) && y > (Y / 2 - SY / 2))
-					|| !map.get(p).isEmpty()) {
+					|| !map.get(p).isEmpty()
+					|| !inEllipse(x, y)) {
 				numobst++;
 				continue;
 			}
@@ -159,7 +168,8 @@ public class World extends Agent {
 			Point p = new Point(x, y);
 			if ((x < (X / 2 + SX / 2) && x > (X / 2 - SX / 2)
 				  && y < (Y / 2 + SY / 2) && y > (Y / 2 - SY / 2))
-					|| !map.get(p).isEmpty()) {
+					|| !map.get(p).isEmpty()
+					|| !inEllipse(x, y)) {
 				numgold++;
 				continue;
 			}
